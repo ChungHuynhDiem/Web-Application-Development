@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+
+    {% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='post.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    {% endblock %}
+
+{% block content %}
+    <h1 class="my-5">{{ title }}</h1>
+    <h4>{{post.author}}, {{post.date}}</h4>
+    <div class="info_post my-4">
+        <img src="{{ url_for('static', filename='images/' + post.image_id) }}" alt="ImgPost" class="card-img-top mx-auto d-block">
+        <div class="content">
+            post.text {{post.text}}
+        </div>
+    </div>
+    <div class="feedbackForm border rounded mb-3">
+        <form action="" method="POST">
+        
+            <div class=" p-2 bg-secondary">Оставьте комментарий:</div>
+            <div class="m-4">
+                <textarea id="feedback" name="feedback" required class="col-md-12"></textarea>
+                <button type="submit" class="btn btn-success m-3">Отправить</button>
+            </div>
+        </form>
+    </div>
+    {% for comment in post.comments %}
+            <div class="comments">
+                <div class="row">
+                    <div class="AvatarCLient col-md-1 ">
+                        <img src="{{ url_for('static', filename='images/' + post.avatarclient) }}" class="rounded-circle" width="50" height="50" alt="Avatar">
+                    </div>
+                    <div class="InfoComment col-md-11">
+                        <div class="NameClient fw-bold">
+                            {{comment.author}}
+                        </div>
+                        <div class="ContentOfComment m-lg-2">
+                            {{comment.text}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+    {% endfor %}
+    
+    <div class="footer-basic">
+        <footer>
+            <div class="social"><a href="#"><i class="icon fa-brands fa-facebook-f"></i></a><a href="#"><i
+                        class="icon fa-brands fa-instagram"></i></a><a href="#"><i class="icon fa-brands fa-telegram"></i></a><a
+                    href="#"><i class="icon fa-brands fa-whatsapp"></i></a></div>
+            <ul class="list-inline">
+                <li class="list-inline-item"><a href="#">Home</a></li>
+                <li class="list-inline-item"><a href="#">Services</a></li>
+                <li class="list-inline-item"><a href="#">About</a></li>
+                <li class="list-inline-item"><a href="#">Terms</a></li>
+                <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+            </ul>
+            <p class="copyright">Chung Huynh Diem © 231-352</p>
+        </footer>
+    </div>
+
+
+{% endblock %}

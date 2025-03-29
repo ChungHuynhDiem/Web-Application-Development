@@ -1,0 +1,41 @@
+from datetime import datetime
+import pytest
+from flask import template_rendered
+from contextlib import contextmanager
+# from app import app as application
+from app.app import create_app  # Import hàm khởi tạo app
+
+
+@pytest.fixture
+def app():
+    # app = create_app()  # Tạo Flask app mới
+    return app
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+@pytest.fixture
+@contextmanager
+def captured_templates(app):
+    recorded = []
+    def record(sender, template, context, **extra):
+        recorded.append((template, context))
+    template_rendered.connect(record, app)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, app)
+
+@pytest.fixture
+def posts_list():
+    return [
+        {
+            'title': 'Заголовок поста',
+            'text': 'Текст поста',
+            'author': 'Иванов Иван Иванович',
+            'date': datetime(2025, 3, 10),
+            'image_id': '123.jpg',
+            'comments': []
+        }
+    ]
