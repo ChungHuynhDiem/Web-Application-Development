@@ -9,8 +9,6 @@ fake = Faker()
 app = Flask(__name__)
 application = app
 
-def create_app():
-    app = Flask(__name__)
 
 images_ids = ['7d4e9175-95ea-4c5f-8be5-92a6b708bb3c',
               '2d2ab7df-cdbc-48a8-a936-35bba702def5',
@@ -64,5 +62,4 @@ def about():
     return render_template('about.html', title='Об авторе')
 
 if __name__ == '__main__':
-    # app = create_app()
     app.run(debug=True)

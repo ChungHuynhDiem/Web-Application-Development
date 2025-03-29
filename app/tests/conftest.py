@@ -3,13 +3,14 @@ import pytest
 from flask import template_rendered
 from contextlib import contextmanager
 # from app import app as application
-from app.app import create_app  # Import hàm khởi tạo app
+from app.app import app as application
+
+# from app.app import create_app  # Import hàm khởi tạo app
 
 
 @pytest.fixture
 def app():
-    # app = create_app()  # Tạo Flask app mới
-    return app
+    return application
 
 @pytest.fixture
 def client(app):
@@ -36,6 +37,7 @@ def posts_list():
             'author': 'Иванов Иван Иванович',
             'date': datetime(2025, 3, 10),
             'image_id': '123.jpg',
-            'comments': []
+            'comments': [],
+            'avatarclient': 'client.jpg',
         }
     ]
