@@ -72,7 +72,11 @@
                                 placeholder="Enter password" />
                             <label class="form-label" for="form3Example4">Password</label>
                         </div>
-    
+
+                        <div data-mdb-input-init class="form-outline mb-3">
+                            <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                        </div>
+                        
                         <div class="d-flex justify-content-between align-items-center">
                             <!-- Checkbox -->
                             <div class="form-check mb-0">

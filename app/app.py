@@ -62,7 +62,12 @@ def posts_list():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    status = request.args.get('Status')
+    # Convert string to actual boolean
+    if status is not None:
+        status = status == 'True'  # Convert "True" => True 
+    print(status)
+    return render_template('index.html', Status=status)
 
 @app.route('/posts')
 def posts():
@@ -172,21 +177,49 @@ def get_user_by_username(username, password):
     return None
 
 
+# @app.route('/UserAuth', methods=['GET', 'POST'])
+# def UserAuth():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         password = request.form.get('password')
+#         remember = 'RememberMe' in request.form
+
+#         user = get_user_by_username(username, password)
+#         if(user):
+#             login_user(user, remember=remember)
+#             return render_template('index.html',Status=True)
+#         else:
+#             return render_template('UserAuthentication.html',Status=False)
+ 
+#     return render_template('UserAuthentication.html',Status=True)
+
 @app.route('/UserAuth', methods=['GET', 'POST'])
 def UserAuth():
+    next_page = request.args.get('next')  # Lấy trang đích sau khi đăng nhập
+    status_danger = request.args.get('StatusDanger') 
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         remember = 'RememberMe' in request.form
+        next_page = request.form.get('next')
 
         user = get_user_by_username(username, password)
-        if(user):
+        if user:
             login_user(user, remember=remember)
-            return render_template('index.html',Status=True)
-        else:
-            return render_template('UserAuthentication.html',Status=False)
- 
-    return render_template('UserAuthentication.html',Status=True)
+            print(next_page)
+            # Nếu có next_page thì redirect tới đó, không thì về trang chính
+            if next_page and next_page.lower() != 'none':
+                return redirect('/' + next_page)
+            else:
+                return redirect(url_for('index', Status=True))
+
+        return render_template('UserAuthentication.html', Status=False)
+    if(status_danger=="True"):
+        status_danger=True
+    if(status_danger=="False"):
+        status_danger=False
+    return render_template('UserAuthentication.html', Status=True, StatusDanger=status_danger)
+
 
 from flask_login import current_user
 
@@ -202,12 +235,23 @@ def logout():
     logout_user()
     return redirect(url_for('UserAuth'))
 
+# @app.route('/secretpage')
+# def SecretPage():
+#     if current_user.is_authenticated:
+#         return render_template('secretpage.html')
+#     else:
+#         return render_template('UserAuthentication.html',StatusDanger=False)
+
+from flask import redirect, url_for
+
 @app.route('/secretpage')
 def SecretPage():
     if current_user.is_authenticated:
         return render_template('secretpage.html')
     else:
-        return render_template('UserAuthentication.html',StatusDanger=False)
+        # Lưu lại trang cần truy cập sau khi đăng nhập bằng next
+        return redirect(url_for('UserAuth', next='secretpage', StatusDanger=False))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
