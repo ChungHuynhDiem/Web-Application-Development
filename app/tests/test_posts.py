@@ -1,5 +1,6 @@
-from flask import request  # Thêm dòng này ở đầu file
-
+import pytest
+from flask import session, url_for  # Thêm dòng này ở đầu file
+from flask_login import current_user,UserMixin
 
 def test_posts_index(client):
     response = client.get("/posts")
@@ -316,12 +317,6 @@ def test_phone_form_valid_number(client):
         assert "Success!!!" in decoded
         assert expected_format in decoded
 
-# def test_phone_form_formatting(client, mocker):
-#     """Test phone number formatting"""
-#     mocker.patch('app.FuncPY.CheckAndFomatNP.format_phone_number', return_value='TEST-FORMATTED')
-#     response = client.post('/formnumberphone', data={'phone_number': '0123456789'})
-#     assert "TEST-FORMATTED" in response.data.decode('utf-8')
-
 def test_phone_form_formatting(client, mocker):
     """Test phone number formatting"""
     # Mock hàm valid_phone_number để luôn trả về False (valid)
@@ -345,3 +340,105 @@ def test_navigation_between_routes(client):
     for route in routes:
         response = client.get(route)
         assert response.status_code == 200, f"Failed on route {route}"
+
+# lab 3
+
+def test_count_of_visits_first_time(client):
+    """Test visit counter on first visit"""
+    with client:
+        response = client.get('/countofvisits')
+        assert response.status_code == 200
+        # Проверяем, что счётчик установлен в сессии
+        assert 'visit_count' in session
+        assert session['visit_count'] == 1
+        # Проверяем, что значение отображается в ответе
+        assert b'1' in response.data
+
+def test_count_of_visits_multiple(client):
+    """Test visit counter increments correctly"""
+    with client:
+        # Первый визит
+        client.get('/countofvisits')
+        # Второй визит
+        response = client.get('/countofvisits')
+        assert session['visit_count'] == 2
+        assert b'2' in response.data
+
+def test_user_auth_get(client):
+    """Test UserAuth route with GET method"""
+    response = client.get('/UserAuth')
+    assert response.status_code == 200
+    assert b'Login' in response.data
+
+@pytest.fixture
+def test_user():
+    return {
+        'id': 1,
+        'username': 'user',
+        'password': 'qwerty'
+    }
+
+class User(UserMixin):
+    def __init__(self,id, username, password):
+        self.id = id 
+        self.username = username
+        self.password = password
+# Фикстура для аутентифицированного пользователя
+@pytest.fixture
+def authenticated_user(app, test_user):
+    user = User(test_user['id'], test_user['username'], test_user['password'])
+    return user
+
+
+def test_user_auth_successful_login(client, test_user):
+    """Test successful user authentication"""
+    response = client.post('/UserAuth', data={
+        'username': test_user['username'],
+        'password': test_user['password'],
+        'RememberMe': 'on'
+    }, follow_redirects=True)
+    assert response.status_code == 200
+
+def test_user_auth_failed_login(client):
+    """Test failed user authentication"""
+    response = client.post('/UserAuth', data={
+        'username': 'wrong',
+        'password': 'wrong'
+    })
+    assert response.status_code == 200
+
+def test_check_login_authenticated(client, authenticated_user):
+    """Test checklogin route with authenticated user"""
+    # Đăng nhập trước khi test
+    with client:
+        # 1. Thực hiện đăng nhập
+        login_response = client.post('/UserAuth', data={
+            'username': authenticated_user.username,
+            'password': authenticated_user.password
+        }, follow_redirects=True)
+        assert login_response.status_code == 200
+        
+        # 2. Kiểm tra route /checklogin khi đã đăng nhập
+        checklogin_response = client.get('/checklogin')
+        assert checklogin_response.status_code == 200
+        
+        decoded_response = checklogin_response.data.decode('utf-8')
+        assert 'Привет' in decoded_response
+        assert authenticated_user.username in decoded_response
+
+def test_check_login_unauthenticated(client):
+    """Test checklogin route with unauthenticated user"""
+    response = client.get('/checklogin')
+    assert response.status_code == 200
+    decoded = response.data.decode('utf-8')
+    assert 'Вы не вошли в систему' in decoded
+
+def test_logout_route(client, authenticated_user):
+    """Test logout functionality"""
+    response = client.get('/logout', follow_redirects=True)
+    assert response.status_code == 200
+
+def test_secret_page_authenticated(client, authenticated_user):
+    """Test access to secret page when authenticated"""
+    response = client.get('/secretpage')
+    assert response.status_code == 200

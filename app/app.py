@@ -1,14 +1,29 @@
-
+from datetime import timedelta
 import random
 from functools import lru_cache
-from flask import Flask, render_template, abort, request, make_response
-# from FuncPY.CheckAndFomatNP import valid_phone_number, format_phone_number
-from app.FuncPY.CheckAndFomatNP import valid_phone_number, format_phone_number
-
+from flask import Flask, render_template, abort, request, make_response,session,redirect, url_for
+from FuncPY.CheckAndFomatNP import valid_phone_number, format_phone_number
+# from app.FuncPY.CheckAndFomatNP import valid_phone_number, format_phone_number
+from flask_login import LoginManager,login_user,UserMixin,logout_user,current_user,login_required
 from faker import Faker
 fake = Faker()
 app = Flask(__name__)
 application = app
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
+# Thiết lập khóa bí mật để Flask có thể sử dụng session
+app.secret_key = 'chunghuynhdiem'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'UserAuth'  # tên function, không phải URL
+
+
+users = {
+    "user": {
+        "id": 1,
+        "username": "user",
+        "password": "qwerty"
+    }
+}
 
 
 images_ids = ['7d4e9175-95ea-4c5f-8be5-92a6b708bb3c',
@@ -113,20 +128,6 @@ def form_parameters():
     # Nếu phương thức là GET, chỉ hiển thị form
     return render_template("FormParameters.html")
 
-# @app.route('/formnumberphone', methods=['GET', 'POST'])
-# def form_number():
-#     error = None
-#     phone_number = None
-#     if request.method == 'POST':
-#         phone_number = request.form['phone_number']
-#         # Validate phone number
-#         if valid_phone_number(phone_number):
-#             error = valid_phone_number(phone_number)
-#         else:
-#             error = 'Sucess!!!'
-#             phone_number = format_phone_number(request.form['phone_number'])
-#     return render_template("CheckPhoneNumber.html", error=error, phone_number=phone_number)
-
 @app.route('/formnumberphone', methods=['GET', 'POST'])
 def form_number():
     error = None
@@ -142,6 +143,71 @@ def form_number():
     return render_template("CheckPhoneNumber.html",
                          error=error,
                          phone_number=formatted_number)
+
+@app.route('/countofvisits')
+def countofvisits():
+    if 'visit_count' in session:
+        session['visit_count'] +=1
+    else:
+        session['visit_count']=1
+    return render_template('VisitorCount.html',resultcount = session['visit_count'])
+
+@login_manager.user_loader
+def load_user(user_id):
+    for user_data in users.values():
+        if str(user_data['id']) == str(user_id):
+            return User(user_data['id'], user_data['username'], user_data['password'])
+    return None
+
+class User(UserMixin):
+    def __init__(self,id, username, password):
+        self.id = id 
+        self.username = username
+        self.password = password
+
+def get_user_by_username(username, password):
+    user_data = users.get(username)
+    if user_data and user_data['password'] == password:
+        return User(user_data['id'], user_data['username'], user_data['password'])
+    return None
+
+
+@app.route('/UserAuth', methods=['GET', 'POST'])
+def UserAuth():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        remember = 'RememberMe' in request.form
+
+        user = get_user_by_username(username, password)
+        if(user):
+            login_user(user, remember=remember)
+            return render_template('index.html',Status=True)
+        else:
+            return render_template('UserAuthentication.html',Status=False)
+ 
+    return render_template('UserAuthentication.html',Status=True)
+
+from flask_login import current_user
+
+# Trong một route
+@app.route('/checklogin')
+def checklogin():
+    return render_template('checklogin.html',current_user=current_user)
+    
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('UserAuth'))
+
+@app.route('/secretpage')
+def SecretPage():
+    if current_user.is_authenticated:
+        return render_template('secretpage.html')
+    else:
+        return render_template('UserAuthentication.html',StatusDanger=False)
 
 if __name__ == '__main__':
     app.run(debug=True)
