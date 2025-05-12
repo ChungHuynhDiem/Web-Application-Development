@@ -1,43 +1,48 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {% block css %}
-                
-    {% endblock %}
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
-    <title>
-        {% if title %}
-          {{ title }}
-        {% else %}
-          Лабораторная работа
-        {% endif %}
-    </title>
-  </head>
-  <body>
-    <header>
-      <div id="main-content">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-              <a class="navbar-brand" href="{{ url_for('index') }}">Лабораторная работа</a>
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                  <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('index') }}">Задание</a>
-                  </li>
-                  <li class="nav-item">
-                    <!-- <a class="nav-link" aria-current="page" href="{{ url_for('posts') }}">Посты</a>
+  {% block css %}
+
+  {% endblock %}
+
+  <title>
+    {% if title %}
+    {{ title }}
+    {% else %}
+    Лабораторная работа
+    {% endif %}
+  </title>
+</head>
+
+<body>
+  <header>
+    <div id="main-content">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+          <a class="navbar-brand" href="{{ url_for('index') }}">Лабораторная работа</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ url_for('index') }}">Задание</a>
+              </li>
+              <li class="nav-item">
+                <!-- <a class="nav-link" aria-current="page" href="{{ url_for('posts') }}">Посты</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('about') }}">Об авторе</a>
@@ -57,37 +62,46 @@
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('form_number') }}">проверка номера телефона</a>
                   </li> -->
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('countofvisits') }}">счётчик посещений</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('UserAuth') }}">Аутентификация пользователей</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('checklogin') }}">Провека логина</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('SecretPage') }}">Секретная страница</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </nav>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('countofvisits') }}">счётчик посещений</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('UserAuth') }}">Аутентификация пользователей</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('checklogin') }}">Провека логина</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('SecretPage') }}">Секретная страница</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('ChangePassWord') }}">Изменить пароль</a>
+              </li>
+            </ul>
+          </div>
         </div>
-        {% block alert %}
-            
-        {% endblock %}
-    </header>
+      </nav>
+    </div>
+    {% block alert %}
 
-    <main class="my-3">
-        <div class="container">
-            {% block content %}
-                <h1>Содержимое по умолчанию</h1>
-            {% endblock %}
-        </div>
-    </main>
+    {% endblock %}
+  </header>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <main class="my-3">
+    <div class="container">
+      {% block content %}
+      <h1>Содержимое по умолчанию</h1>
+      {% endblock %}
+    </div>
+  </main>
 
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+
+</body>
+{% block js %}
+
+{% endblock %}
+
 </html>

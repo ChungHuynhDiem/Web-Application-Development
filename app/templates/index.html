@@ -1,90 +1,316 @@
 {% extends 'base.html' %}
 
 {% block css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='UserAuth.css') }}">
-<script src="{{ url_for('static', filename='UserAuth.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='post.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='secretpage.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 {% endblock %}
 
+
 {% block alert %}
-    {% if Status is defined %}
-        {% if Status == True %}
-            <div id="autoAlert" class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Sucssec!! </strong> Login successful.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endif %}
-    {% endif %}
+{% if Status is defined %}
+{% if Status == 'True' %}
+<div id="autoAlert" class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Sucssec!! </strong> Login successful.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% if Status == 'UsernameExists' %}
+<div id="autoAlert" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong> Danger! </strong> Username already exists.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='secretpage.js') }}"></script>
 {% endblock %}
 
 {% block content %}
-<!-- <div>{{Status}}</div> -->
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="my-5">Задание к лабораторной работе</h1>
-        
-        <p class="fw-bold">
-            1. Доработайте прилагаемое к заданию веб-приложение, добавив в него 
-            шаблон post.html, отображающий содержимое поста.
-        </p>
+<table>
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>User Name</th>
+            {% if current_user.is_authenticated %}
+            <th>Pass Word</th>
+            {% endif %}
+            <th>Full Name</th>
+            <th>User Role</th>
+            {% if current_user.is_authenticated %}
+            <th>Created At</th>
+            <th>Updated At</th>
+            {% endif %}
+            <th>Actions</th>
+        </tr>
+    </thead>
 
-        <p>На странице должны присутствовать следующие элементы:</p>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ user.UserName }}</td>
+            {% if current_user.is_authenticated %}
+            <td class="password-cell">{{ user.PassWord }}</td>
+            {% endif %}
+            <td>{{ user.FullName }}</td>
+            <td>{{ user.UserRole }}</td>
+            {% if current_user.is_authenticated %}
+            <td>{{ user.CreatedAt }}</td>
+            <td>{{ user.UpdatedAt }}</td>
+            {% endif %}
+            <td>
+                <button class="button view-btn" data-bs-toggle="modal" data-bs-target="#ViewModal"
+                    data-id="{{ user.id }}">
+                    View
+                </button>
+                {% if current_user.is_authenticated %}
+                <button class="button edit-btn" data-bs-toggle="modal" data-bs-target="#EditModal"
+                    data-id="{{ user.id }}">
+                    Edit
+                </button>
+                <button class="button delete-btn" data-bs-toggle="modal" data-bs-target="#DeleteModal"
+                    data-id="{{ user.id }}">
+                    Delete
+                </button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-        <ul class="my-3">
-            <li>заголовок поста,</li>
-            <li>имя автора,</li>
-            <li>дата публикации,</li>
-            <li>изображение,</li>
-            <li>текст поста,</li>
-            <li>форма «Оставьте комментарий» с полем для ввода текста и кнопкой «Отправить»,</li>
-            <li>комментарии и ответы на них.</li>
-        </ul>
+{% if current_user.is_authenticated %}
+<div class="d-flex justify-content-center align-items-center">
+    <button class="button createacc-btn glow-on-hover" data-bs-toggle="modal" data-bs-target="#CreateAccModal">
+        Create Acc
+    </button>
+</div>
+{% endif %}
 
-        <p>Все данные должны подставляться в шаблон из приложения.</p>
+<div class="modal" id="ViewModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">View Account</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-        <p>
-            <a href="https://www.tutorialrepublic.com/twitter-bootstrap-tutorial/bootstrap-media-objects.php" target="_blank">Пример</a> того, как можно сделать отображение комментариев.
-        </p>
-        
-        <p>Пример возможного оформления страницы:</p>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="View_id" style="margin-right: 10px;">id: </label>
+                    <input type="text" id="View_id" name="View_id" class="form-control form-control-lg" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="View_UserName" style="margin-right: 10px;">User Name: </label>
+                    <input type="text" id="View_UserName" name="View_UserName" class="form-control form-control-lg"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="View_PassWord" style="margin-right: 10px;">PassWord: </label>
+                    <input type="text" id="View_PassWord" name="View_PassWord" class="form-control form-control-lg"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="View_FullName" style="margin-right: 10px;">Full Name: </label>
+                    <input type="text" id="View_FullName" name="View_FullName" class="form-control form-control-lg"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="View_UserRole" style="margin-right: 10px;">User Role: </label>
+                    <input type="text" id="View_UserRole" name="View_UserRole" class="form-control form-control-lg"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="View_CreatedAt" style="margin-right: 10px;">Created At: </label>
+                    <input type="text" id="View_CreatedAt" name="View_CreatedAt" class="form-control form-control-lg"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="View_UpdatedAt" style="margin-right: 10px;">Updated At: </label>
+                    <input type="text" id="View_UpdatedAt" name="View_UpdatedAt" class="form-control form-control-lg"
+                        readonly />
+                </div>
+            </div>
 
-        <img class="img-fluid my-3 border" src="{{ url_for('static', filename='images/post-example-page.png') }}" alt="Post page example">
-
-        <p class="fw-bold">
-            2. Добавьте в базовый шаблон подвал (англ. footer) сайта. Укажите там ФИО и номер группы.
-        </p>
-
-        <p class="fw-bold">
-            3. Напишите тесты для реализованного функционала. Разместите тесты в файле 
-            tests/test_posts.py. Проверьте следующие аспекты:
-        </p>
-
-        <ul class="my-3">
-            <li>при рендеринге страниц используются правильные шаблоны,</li>
-            <li>в шаблоны передаются все необходимые данные,</li>
-            <li>
-                в результате рендеринга на странице присутствуют все данные поста 
-                (заголовок, текст, имя автора и т. д.),
-            </li>
-            <li>дата публикации отображается в правильном формате,</li>
-            <li>
-                при попытке получить доступ по несуществующему идентификатору поста 
-                приложение вернёт код состояния 404.
-            </li>
-        </ul>
-
-        <p>В результате у вас должно получиться не менее 15 тестов.</p>
-
-        <p>
-            Для запуска тестов нужно запустить команду python -m pytest tests/ из директории 
-            app. Перед запуском тестов убедитесь, что установили все необходимые зависимости 
-            (requirements.txt).
-        </p>
-
-        <p>
-            Выложите ваше веб-приложение на хостинг. В качестве ответа на соответствующее этой лабораторной работе задание в LMS 
-            вам нужно указать ссылку на репозиторий с вашим решением и ссылку на ваше приложение на хостинге. В 
-            случае, если репозиторий закрытый, -- не забудьте предоставить преподавателю доступ.
-        </p>
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
     </div>
+</div>
+
+<div class="modal" id="EditModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="" method="post" id="EditForm">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Account</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+
+                <!-- Modal body -->
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_id" style="margin-right: 10px;">id: </label>
+                        <input type="text" id="Edit_id" name="Edit_id" class="form-control form-control-lg" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_UserName" style="margin-right: 10px;">User Name: </label>
+                        <input type="text" id="Edit_UserName" name="Edit_UserName"
+                            class="form-control form-control-lg" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_PassWord" style="margin-right: 10px;">PassWord: </label>
+                        <input type="text" id="Edit_PassWord" name="Edit_PassWord"
+                            class="form-control form-control-lg" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_FullName" style="margin-right: 10px;">Full Name: </label>
+                        <input type="text" id="Edit_FullName" name="Edit_FullName"
+                            class="form-control form-control-lg" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_UserRole" style="margin-right: 10px;">User Role: </label>
+                        <select id="Edit_UserRole" name="Edit_UserRole">
+                            <option value="">-- Choose role --</option>
+                            <option value="super_admin">super admin</option>
+                            <option value="store_manager">store manager</option>
+                            <option value="customer_support">customer_support</option>
+                            <option value="customer">customer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_CreatedAt" style="margin-right: 10px;">Created At: </label>
+                        <input type="text" id="Edit_CreatedAt" name="Edit_CreatedAt"
+                            class="form-control form-control-lg" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Edit_UpdatedAt" style="margin-right: 10px;">Updated At: </label>
+                        <input type="text" id="Edit_UpdatedAt" name="Edit_UpdatedAt"
+                            class="form-control form-control-lg" readonly />
+                    </div>
+
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="DeleteModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Delete Account</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <h3>Do you want to delete account <span id="delete-acc" class="text-danger fw-bold"></span>?</h3>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-success" id="DeleteUser" data-bs-dismiss="modal">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="CreateAccModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="" method="post" id="CreateForm">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Create Modal</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="Create_UserName" style="margin-right: 10px;">User Name: </label>
+                        <input type="text" id="Create_UserName" name="Create_UserName"
+                            class="form-control form-control-lg" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Create_PassWord" style="margin-right: 10px;">PassWord: </label>
+                        <input type="password" id="Create_PassWord" name="Create_PassWord"
+                            class="form-control form-control-lg" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Create_FullName" style="margin-right: 10px;">Full Name: </label>
+                        <input type="text" id="Create_FullName" name="Create_FullName"
+                            class="form-control form-control-lg" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="Create_UserRole" style="margin-right: 10px;">User Role: </label>
+                        <select id="Create_UserRole" name="Create_UserRole">
+                            <option value="">-- Choose role --</option>
+                            <option value="super_admin">super admin</option>
+                            <option value="store_manager">store manager</option>
+                            <option value="customer_support">customer_support</option>
+                            <option value="customer">customer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" id="SubmitCreateAcc">
+                        Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="footer-basic">
+    <footer>
+        <div class="social">
+            <a href="#"><i class="icon fa-brands fa-facebook-f"></i></a><a href="#"><i
+                    class="icon fa-brands fa-instagram"></i></a><a href="#"><i
+                    class="icon fa-brands fa-telegram"></i></a><a href="#"><i
+                    class="icon fa-brands fa-whatsapp"></i></a>
+        </div>
+        <ul class="list-inline">
+            <li class="list-inline-item"><a href="#">Home</a></li>
+            <li class="list-inline-item"><a href="#">Services</a></li>
+            <li class="list-inline-item"><a href="#">About</a></li>
+            <li class="list-inline-item"><a href="#">Terms</a></li>
+            <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+        </ul>
+        <p class="copyright">Chung Huynh Diem © 231-352</p>
+    </footer>
 </div>
 {% endblock %}
